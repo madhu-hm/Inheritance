@@ -1,204 +1,197 @@
 package assignment8;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+
 public class LibraryManagement {
-	public static void main(String[] args) {
-		LibraryManagementSystem system=new LibraryManagementSystem("Student","Madhu","password123");
-		system.register();
-		system.login();
-		
-		Student student=new Student("Madhu","S001","12th");
-		Staff staff=new Staff("Mr.Harry","M001","Mathematics");
-		
-		Book book1=new Book("Java Programming","James Gosling","12345","O'Reilly");
-		Book book2=new Book("Data Structures","Robert Lafore","67890","Pearson");
-		
-		LibraryDatabase library=new LibraryDatabase();
-		library.addBook(book1);
-		library.addBook(book2);
-		
-		library.displayBooks();
-		
-		student.getBookInfo(book1);
-		book1.bookRequest();
-		
-		Librarian librarian =new Librarian("Emma","H001","admin123");
-		librarian.verifyLibrarian();
-		librarian.search("Java");
-		
-		student.checkAccount();
-		student.account.calculateFine();
-		
-		system.logout();
-	}
-}
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        LibraryManagementSystem system = new LibraryManagementSystem();
+        
+        while (true) {
+            System.out.println("\nLibrary Management System");
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Add Book");
+            System.out.println("4. Display Books");
+            System.out.println("5. Search Book");
+            System.out.println("6. Borrow Book");
+            System.out.println("7. Return Book");
+            System.out.println("8. Logout");
+            System.out.println("9. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
-class LibraryManagementSystem{
-	String userType;
-	String username;
-	String password;
-	
-	public LibraryManagementSystem(String userType,String username,String password) {
-		this.userType=userType;
-		this.username=username;
-		this.password=password;
-	}
-	
-	void login() {
-		System.out.println(username+" logged in as "+userType);
-	}
-	
-	void register() {
-		System.out.println(username+" registered successfully!");
-	}
-	
-	void logout() {
-		System.out.println(username+" logged out.");
-	}
-}
-
-class Account{
-	int noBorrowedBooks,noReservedBooks,noReturnedBooks,noLostBooks;
-	double fineAmount;
-	
-	public Account() {
-		this.noBorrowedBooks++;
-		this.noReservedBooks=0;
-		this.noReturnedBooks=0;
-		this.noLostBooks=0;
-		this.fineAmount=0;
-	}
-	
-	void calculateFine() {
-		fineAmount=noLostBooks*50;
-		System.out.println("Total fine: $"+fineAmount);
-	}
-}
-
-class Book{
-	String title,author,ISBN,publication;
-	
-	public Book(String title,String author,String ISBN,String publication) {
-		this.title=title;
-		this.author=author;
-		this.ISBN=ISBN;
-		this.publication=publication;
-	}
-	
-	void showDueDate() {
-		System.out.println("Due date for "+title+" is in 14 days.");
-	}
-	
-	void reservationStatus() {
-        System.out.println("Book '" + title + "' is available for reservation.");
-    }
-
-    void feedback(String feedbackMessage) {
-        System.out.println("Feedback for " + title + ": " + feedbackMessage);
-    }
-
-    void bookRequest() {
-        System.out.println("Request placed for book: " + title);
-    }
-
-    void renewInfo() {
-        System.out.println("Book " + title + " renewed for 7 more days.");
+            switch (choice) {
+                case 1:
+                    system.register(scanner);
+                    break;
+                case 2:
+                    system.login(scanner);
+                    break;
+                case 3:
+                    system.addBook(scanner);
+                    break;
+                case 4:
+                    system.displayBooks();
+                    break;
+                case 5:
+                    system.searchBook(scanner);
+                    break;
+                case 6:
+                    system.borrowBook(scanner);
+                    break;
+                case 7:
+                    system.returnBook(scanner);
+                    break;
+                case 8:
+                    system.logout();
+                    break;
+                case 9:
+                    System.out.println("Exiting system...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
     }
 }
 
-class User{
-	String name;
-	String id;
-	Account account;
-	
-	public User(String name, String id) {
-	  this.name = name;
-	  this.id = id;
-	  this.account = new Account();
-	}
-
-	void verify() {
-	   System.out.println("Verifying user: " + name);
-	}
-
-	void checkAccount() {
-	   System.out.println(name + "'s Account: Borrowed Books = " + account.noBorrowedBooks);
-	}
-
-	void getBookInfo(Book book) {
-	   System.out.println("Book Info: " + book.title + " by " + book.author);
-	}
-}
-
-class Staff extends User {
-    String dept;
-
-    public Staff(String name, String id, String dept) {
-        super(name, id);
-        this.dept = dept;
+class LibraryManagementSystem {
+    private String loggedInUser = null;
+    private final LibraryDatabase library = new LibraryDatabase();
+    private final Map<String, String> userDatabase = new HashMap<>();
+    
+    void register(Scanner scanner) {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        String password = scanner.nextLine();
+        userDatabase.put(username, password);
+        System.out.println(username + " registered successfully!");
+    }
+    
+    void login(Scanner scanner) {
+        if (loggedInUser != null) {
+            System.out.println("Already logged in as " + loggedInUser);
+            return;
+        }
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        String password = scanner.nextLine();
+        if (userDatabase.containsKey(username) && userDatabase.get(username).equals(password)) {
+            loggedInUser = username;
+            System.out.println(username + " logged in successfully.");
+        } else {
+            System.out.println("Invalid credentials.");
+        }
+    }
+    
+    void logout() {
+        if (loggedInUser == null) {
+            System.out.println("No user is currently logged in.");
+        } else {
+            System.out.println(loggedInUser + " logged out.");
+            loggedInUser = null;
+        }
+    }
+    
+    void addBook(Scanner scanner) {
+        System.out.print("Enter book title: ");
+        String title = scanner.nextLine();
+        System.out.print("Enter author: ");
+        String author = scanner.nextLine();
+        System.out.print("Enter ISBN: ");
+        String isbn = scanner.nextLine();
+        System.out.print("Enter publication: ");
+        String publication = scanner.nextLine();
+        library.addBook(new Book(title, author, isbn, publication));
+    }
+    
+    void displayBooks() {
+        library.displayBooks();
+    }
+    
+    void searchBook(Scanner scanner) {
+        System.out.print("Enter book title or author to search: ");
+        String search = scanner.nextLine();
+        library.searchBook(search);
+    }
+    
+    void borrowBook(Scanner scanner) {
+        System.out.print("Enter book title to borrow: ");
+        String title = scanner.nextLine();
+        library.borrowBook(title);
+    }
+    
+    void returnBook(Scanner scanner) {
+        System.out.print("Enter book title to return: ");
+        String title = scanner.nextLine();
+        library.returnBook(title);
     }
 }
 
-class Student extends User {
-    String studentClass;
+class Book {
+    String title, author, ISBN, publication;
+    boolean isBorrowed = false;
 
-    public Student(String name, String id, String studentClass) {
-        super(name, id);
-        this.studentClass = studentClass;
-    }
-}
-
-class Librarian {
-    String name;
-    String id;
-    String password;
-
-    public Librarian(String name, String id, String password) {
-        this.name = name;
-        this.id = id;
-        this.password = password;
-    }
-
-    void verifyLibrarian() {
-        System.out.println("Librarian " + name + " verified.");
-    }
-
-    void search(String searchString) {
-        System.out.println("Searching books with keyword: " + searchString);
+    public Book(String title, String author, String ISBN, String publication) {
+        this.title = title;
+        this.author = author;
+        this.ISBN = ISBN;
+        this.publication = publication;
     }
 }
 
 class LibraryDatabase {
-    List<Book> listOfBooks = new ArrayList<>();
+    private final List<Book> listOfBooks = new ArrayList<>();
 
     void addBook(Book book) {
         listOfBooks.add(book);
         System.out.println("Book '" + book.title + "' added to the library.");
     }
 
-    void deleteBook(Book book) {
-        listOfBooks.remove(book);
-        System.out.println("Book '" + book.title + "' removed from the library.");
-    }
-
-    void updateBook(Book oldBook, Book newBook) {
-        listOfBooks.remove(oldBook);
-        listOfBooks.add(newBook);
-        System.out.println("Book '" + oldBook.title + "' updated to '" + newBook.title + "'");
-    }
-
     void displayBooks() {
+        if (listOfBooks.isEmpty()) {
+            System.out.println("No books available in the library.");
+            return;
+        }
         System.out.println("Library Books:");
         for (Book book : listOfBooks) {
-            System.out.println("- " + book.title + " by " + book.author);
+            System.out.println("- " + book.title + " by " + book.author + (book.isBorrowed ? " (Borrowed)" : ""));
         }
     }
 
     void searchBook(String search) {
+        boolean found = false;
         for (Book book : listOfBooks) {
-            if (book.title.contains(search) || book.author.contains(search)) {
+            if (book.title.toLowerCase().contains(search.toLowerCase()) || book.author.toLowerCase().contains(search.toLowerCase())) {
                 System.out.println("Found: " + book.title + " by " + book.author);
+                found = true;
             }
         }
+        if (!found) System.out.println("No books found.");
+    }
+
+    void borrowBook(String title) {
+        for (Book book : listOfBooks) {
+            if (book.title.equalsIgnoreCase(title) && !book.isBorrowed) {
+                book.isBorrowed = true;
+                System.out.println("You have borrowed: " + book.title);
+                return;
+            }
+        }
+        System.out.println("Book is not available.");
+    }
+
+    void returnBook(String title) {
+        for (Book book : listOfBooks) {
+            if (book.title.equalsIgnoreCase(title) && book.isBorrowed) {
+                book.isBorrowed = false;
+                System.out.println("You have returned: " + book.title);
+                return;
+            }
+        }
+        System.out.println("Invalid return. Book was not borrowed.");
     }
 }
